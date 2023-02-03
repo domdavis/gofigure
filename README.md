@@ -1,29 +1,10 @@
-# README #
+# Go figure!
 
-This README would normally document whatever steps are necessary to get your application up and running.
+[![Build](https://img.shields.io/bitbucket/pipelines/gofigure/main?style=plastic)](https://bitbucket.org/gofigure/addon/pipelines/home)
+[![Issues](https://img.shields.io/bitbucket/issues-raw/gofigure?style=plastic)](https://bitbucket.org/gofigure/issues)
+[![Pull Requests](https://img.shields.io/bitbucket/pr-raw/gofigure?style=plastic)](https://bitbucket.org/gofigure/pull-requests/)
+[![Go Doc](http://img.shields.io/badge/godoc-reference-5272B4.svg?style=plastic)](http://godoc.org/bitbucket.org/gofigure)
 
-### What is this repository for? ###
-
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+A configuration tool that will allow configuration from the command line,
+environment variable, local config file, or a remote configure file. You give it
+the details and just say "Go figure!".

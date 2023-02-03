@@ -1,0 +1,8 @@
+image:
+  name: davisd/go
+
+pipelines:
+  default:
+    - step:
+        script:
+          - make ci
