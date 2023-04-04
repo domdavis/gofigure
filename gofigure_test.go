@@ -66,20 +66,20 @@ func Example() {
 	//     Display usage information
 	//
 	//   Config File [-c, --config]
-	//     Path to config file
+	//     Path to config file (required)
 	//
 	//   App Name [JSON key: "name", env EXAMPLE_NAME, -n, --name]
-	//     Application name
+	//     Application name (required)
 	//
 	//   Mode [--mode]
-	//     Mode indicator
+	//     Mode indicator (required)
 	//
 	//   IP Address [JSON key: "address", env EXAMPLE_ADDRESS, -a, --address]
 	//     Remote server address
 	//
 	//   Timeout [JSON key: "timeout", env EXAMPLE_TIMEOUT, -t, --timeout]
-	//     Remote server address
+	//     Remote server address (default: 1m0s)
 	//
 	//   TLS [JSON key: "tls", env EXAMPLE_TLS, --tls]
-	//     Use TLS
+	//     Use TLS (default: false)
 }
