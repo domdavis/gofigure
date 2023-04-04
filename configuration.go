@@ -96,6 +96,8 @@ func (c *Configuration) Usage() string {
 
 	for _, group := range c.Groups {
 		for _, setting := range group.Settings {
+			var base string
+
 			if len(setting.Parameters) == 0 {
 				continue
 			}
@@ -106,6 +108,17 @@ func (c *Configuration) Usage() string {
 			b.WriteString(setting.Parameters.Format(c.Prefix))
 			b.WriteString("\n    ")
 			b.WriteString(setting.Value.Description)
+
+			if setting.Value.base != nil && !setting.Mask.Contains(HideUnset) {
+				base = fmt.Sprint(setting.Value.base)
+			}
+
+			if base != "" {
+				b.WriteString(fmt.Sprintf(" (default: %v)", base))
+			} else if setting.Value.base == nil {
+				b.WriteString(" (required)")
+			}
+
 			b.WriteString("\n\n")
 
 			options++
