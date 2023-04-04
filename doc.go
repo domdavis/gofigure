@@ -1,2 +1,2 @@
-// Package golang requires a description.
-package golang
+// Package gofigure requires a description.
+package gofigure

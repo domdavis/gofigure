@@ -8,3 +8,11 @@
 A configuration tool that will allow configuration from the command line,
 environment variable, local config file, or a remote configure file. You give it
 the details and just say "Go figure!".
+
+## Usage
+
+```sh
+go get -u bitbucket.org/idomdavis/gofigure
+```
+
+See [gofigure_test.go]() for example usage.
