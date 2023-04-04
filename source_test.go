@@ -24,15 +24,17 @@ func ExampleSource_Contains() {
 }
 
 func ExampleSource_String() {
+	fmt.Println(gofigure.None)
 	fmt.Println(gofigure.Default)
 	fmt.Println(gofigure.Key)
 	fmt.Println(gofigure.EnvVar)
 	fmt.Println(gofigure.ShortFlag)
 	fmt.Println(gofigure.Flag)
 	fmt.Println(gofigure.Source(math.MaxUint8))
-	fmt.Println(gofigure.None)
+	fmt.Println(gofigure.Source(0))
 
 	// Output:
+	// none
 	// default value
 	// config file key
 	// environment value
