@@ -12,9 +12,7 @@ var ErrUnexpectedArgument = errors.New("unexpected argument")
 // Flags will build a set of Options from the given argument list.
 func Flags(args []string) (Options, error) {
 	const (
-		short = 1
-		long  = 2
-		flag  = "-"
+		flag = "-"
 	)
 
 	options := Options{}
@@ -22,10 +20,10 @@ func Flags(args []string) (Options, error) {
 	for len(args) > 0 {
 		parameter := Parameter{}
 
-		switch strings.Count(args[0], flag) {
-		case long:
+		switch {
+		case strings.HasPrefix(args[0], flag+flag):
 			parameter.Source = Flag
-		case short:
+		case strings.HasPrefix(args[0], flag):
 			parameter.Source = ShortFlag
 		default:
 			return options, NewConfigError(ErrUnexpectedArgument,

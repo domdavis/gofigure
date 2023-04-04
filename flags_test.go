@@ -85,6 +85,16 @@ func TestFlags(t *testing.T) {
 
 		assert.ErrorIs(t, err, gofigure.ErrUnexpectedArgument)
 	})
+
+	t.Run("Flags can include -'s", func(t *testing.T) {
+		t.Parallel()
+
+		flags, err := gofigure.Flags([]string{"-a-b"})
+
+		assert.NoError(t, err)
+		assert.Len(t, flags, 1)
+		assert.Equal(t, "true", flags[flag("a-b", gofigure.ShortFlag)])
+	})
 }
 
 func flag(name string, source gofigure.Source) gofigure.Parameter {
