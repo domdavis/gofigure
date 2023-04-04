@@ -96,7 +96,7 @@ func (c *Configuration) Usage() string {
 
 	for _, group := range c.Groups {
 		for _, setting := range group.Settings {
-			if setting.Value.Source.Contains(None) {
+			if len(setting.Parameters) == 0 {
 				continue
 			}
 

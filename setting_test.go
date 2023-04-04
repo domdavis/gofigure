@@ -146,7 +146,7 @@ func TestSettings_Map(t *testing.T) {
 		assert.ErrorIs(t, settings.Map(options), gofigure.ErrUnexpectedArgument)
 	})
 
-	t.Run("Map will error if am option can't be mapped", func(t *testing.T) {
+	t.Run("Map will error if an option can't be mapped", func(t *testing.T) {
 		t.Parallel()
 
 		var value int

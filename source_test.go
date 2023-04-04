@@ -30,6 +30,7 @@ func ExampleSource_String() {
 	fmt.Println(gofigure.EnvVar)
 	fmt.Println(gofigure.ShortFlag)
 	fmt.Println(gofigure.Flag)
+	fmt.Println(gofigure.Reference)
 	fmt.Println(gofigure.Source(math.MaxUint8))
 	fmt.Println(gofigure.Source(0))
 
@@ -37,9 +38,10 @@ func ExampleSource_String() {
 	// none
 	// default value
 	// config file key
-	// environment value
+	// environment variable
 	// short flag
 	// flag
+	// reference value
 	// config file
 	// source
 }
