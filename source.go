@@ -8,8 +8,7 @@ import "math"
 type Source uint8
 
 const (
-	// None indicates no source has set the Value, or that no source can set
-	// this value.
+	// None indicates no source has set the Value.
 	None = Source(1 << iota)
 
 	// A Default Value has been used. No other sources have overwritten this.
@@ -31,6 +30,11 @@ const (
 	// A Flag on the command line. Can be used either to indicate the
 	// Value can be set via this flag, or that it has been set via this flag.
 	Flag = Source(1 << iota)
+
+	// Reference parameter that cannot be set. Reference parameters are used to
+	// provide output in a report without being settable beyond the default
+	// value. By definition Reference parameters must be Optional.
+	Reference = Source(1 << iota)
 )
 
 const (
@@ -63,11 +67,13 @@ func (s Source) String() string {
 	case Key:
 		return "config file key"
 	case EnvVar:
-		return "environment value"
+		return "environment variable"
 	case ShortFlag:
 		return "short flag"
 	case Flag:
 		return "flag"
+	case Reference:
+		return "reference value"
 	case configFile:
 		return "config file"
 	default:
