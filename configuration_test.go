@@ -128,6 +128,19 @@ func TestConfiguration_Usage(t *testing.T) {
 
 		assert.Equal(t, "[no options]", gofigure.NewConfiguration("").Usage())
 	})
+
+	t.Run("Empty groups are ignored", func(t *testing.T) {
+		t.Parallel()
+
+		var value string
+
+		c := gofigure.NewConfiguration("")
+		g := c.Group("empty")
+		g.Add(gofigure.Required("opt", "opt", &value, gofigure.None,
+			gofigure.HideValue, "hidden option"))
+
+		assert.Equal(t, "[no options]", c.Usage())
+	})
 }
 
 func TestConfiguration_Log(t *testing.T) {

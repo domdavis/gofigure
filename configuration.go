@@ -82,6 +82,10 @@ func (c *Configuration) Usage() string {
 
 	for _, group := range c.Groups {
 		for _, setting := range group.Settings {
+			if setting.Value.Source.Contains(None) {
+				continue
+			}
+
 			b.WriteString("  ")
 			b.WriteString(setting.Value.Name)
 			b.WriteString(" ")

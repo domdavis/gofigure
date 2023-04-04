@@ -8,7 +8,8 @@ import "math"
 type Source uint8
 
 const (
-	// None indicates no source has set the Value.
+	// None indicates no source has set the Value, or that no source can set
+	// this value.
 	None = Source(1 << iota)
 
 	// A Default Value has been used. No other sources have overwritten this.
@@ -32,16 +33,18 @@ const (
 	Flag = Source(1 << iota)
 )
 
-// CommandLine indicates an option can come from a short or long flag.
-const CommandLine = Flag | ShortFlag
+const (
+	// CommandLine indicates an option can come from a short or long flag.
+	CommandLine = Flag | ShortFlag
 
-// NamedSources indicates an option should be set from a flag, environment
-// variable, or JSON key.
-const NamedSources = Flag | EnvVar | Key
+	// NamedSources indicates an option should be set from a flag, environment
+	// variable, or JSON key.
+	NamedSources = Flag | EnvVar | Key
 
-// AllSources indicates an option should be set from a short flag, flag,
-// environment variable, or JSON key.
-const AllSources = NamedSources | ShortFlag
+	// AllSources indicates an option should be set from a short flag, flag,
+	// environment variable, or JSON key.
+	AllSources = NamedSources | ShortFlag
+)
 
 // ConfigFile is used for error reporting purposes.
 const configFile = Source(math.MaxUint8)
@@ -53,6 +56,8 @@ func (s Source) Contains(source Source) bool {
 
 func (s Source) String() string {
 	switch s {
+	case None:
+		return "none"
 	case Default:
 		return "default value"
 	case Key:
