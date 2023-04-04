@@ -15,7 +15,6 @@ vet:
 
 lint:
 	golangci-lint run
-	golint ./...
 
 test:
 	go test -v -covermode=count ./...
