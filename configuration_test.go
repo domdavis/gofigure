@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"bitbucket.org/idomdavis/gofigure"
-	"github.com/sirupsen/logrus"
-	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -143,7 +141,7 @@ func TestConfiguration_Usage(t *testing.T) {
 	})
 }
 
-func TestConfiguration_Log(t *testing.T) {
+func TestConfiguration_Report(t *testing.T) {
 	t.Run("Settings will be correctly logged", func(t *testing.T) {
 		t.Parallel()
 
@@ -160,18 +158,15 @@ func TestConfiguration_Log(t *testing.T) {
 		group.Add(gofigure.Required("C", "c", &c, gofigure.ShortFlag,
 			gofigure.HideSet, "C setting"))
 
-		logger := logrus.New()
-		hook := test.NewLocal(logger)
-
 		err := config.ParseUsing([]string{"-a", "1", "-b", "2", "-c", "3"})
 
 		assert.NoError(t, err)
 
-		config.Log(logger)
+		report := config.Report()
 
-		assert.Len(t, hook.Entries, 1)
-		assert.Equal(t, hook.Entries[0].Data["A"], "1")
-		assert.Equal(t, hook.Entries[0].Data["B"], "SET")
-		assert.Nil(t, hook.Entries[0].Data["C"])
+		assert.Len(t, report, 1)
+		assert.Equal(t, report[0].Values["A"], "1")
+		assert.Equal(t, report[0].Values["B"], "SET")
+		assert.Nil(t, report[0].Values["C"])
 	})
 }

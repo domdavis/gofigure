@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
-	"github.com/sirupsen/logrus"
 )
 
 // Configuration for a program.
@@ -17,6 +15,16 @@ type Configuration struct {
 
 	groups map[string]*Group
 }
+
+// Line in a Report. The values in the Line will respect Mask settings.
+type Line struct {
+	Name   string
+	Values map[string]any
+}
+
+// Report holds the setting configuration in a way that can be reported to the
+// user. Values in the Report will respect Mask settings.
+type Report []Line
 
 // ErrMissingRequiredOption is returned if a required option has not been set
 // after parsing.
@@ -62,15 +70,21 @@ func (c *Configuration) AddHelp(sources Source) {
 		"Display usage information"))
 }
 
-// Log the configuration using the given logger. Masks will be respected.
-func (c *Configuration) Log(logger *logrus.Logger) {
+// Report on the configuration, returning the values in a format that can be
+// displayed to the user. Empty groups will be stripped from the Report. Values
+// in the Report will respect the Mask setting.
+func (c *Configuration) Report() Report {
+	var report Report
+
 	for _, group := range c.Groups {
 		values := group.Values()
 
 		if len(values) > 0 {
-			logger.WithFields(values).Infof("%s Configuration", group.Name)
+			report = append(report, Line{Name: group.Name, Values: values})
 		}
 	}
+
+	return report
 }
 
 // Usage string for this set of Options.
