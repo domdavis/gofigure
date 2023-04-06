@@ -13,7 +13,8 @@ type Configuration struct {
 	Prefix string
 	Groups []*Group
 
-	groups map[string]*Group
+	groups   map[string]*Group
+	external External
 }
 
 // Line in a Report. The values in the Line will respect Mask settings.
@@ -30,7 +31,7 @@ type Report []Line
 // after parsing.
 var ErrMissingRequiredOption = errors.New("missing required option")
 
-const internalGroup = "internal"
+const internalGroup = "Base Configuration"
 
 // NewConfiguration returns a new Configuration set to use the given prefix for
 // environment variables.
@@ -55,7 +56,7 @@ func (c *Configuration) Group(name string) *Group {
 	return group
 }
 
-// AddHelp will add a "help" flag to the set of Options. If ShortFlag is set on
+// AddHelp will add a "help" flag to the set of options. If ShortFlag is set on
 // the sources then a short flag of 'h' is also added. All other sources are
 // ignored.
 func (c *Configuration) AddHelp(sources Source) {
@@ -68,6 +69,22 @@ func (c *Configuration) AddHelp(sources Source) {
 	g := c.Group(internalGroup)
 	g.Add(Optional("Help", "help", &c.Help, false, use, HideValue,
 		"Display usage information"))
+}
+
+// AddConfigFile will add a "config" option to the set of options. If ShortFlag
+// is set on the sources then a short flag of 'h' is also added. All other
+// sources are ignored. The provided value will be used as a path or URI to load
+// and external configuration file from.
+func (c *Configuration) AddConfigFile(sources Source) {
+	use := Flag
+
+	if sources.Contains(ShortFlag) {
+		use |= ShortFlag
+	}
+
+	g := c.Group(internalGroup)
+	g.Add(Optional("Config File", "config", &c.external, "", use, MaskUnset,
+		"Provide configuration from an external JSON file"))
 }
 
 // Report on the configuration, returning the values in a format that can be

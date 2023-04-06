@@ -9,8 +9,6 @@ import (
 )
 
 func Example() {
-	var configFile gofigure.External
-
 	var settings struct {
 		Mode    int
 		Name    string
@@ -21,11 +19,10 @@ func Example() {
 
 	config := gofigure.NewConfiguration("EXAMPLE")
 	config.AddHelp(gofigure.CommandLine)
+	config.AddConfigFile(gofigure.CommandLine)
 
 	group := config.Group("settings")
 
-	group.Add(gofigure.Required("Config File", "config", &configFile,
-		gofigure.CommandLine, gofigure.ReportValue, "Path to config file"))
 	group.Add(gofigure.Required("App Name", "name", &settings.Name,
 		gofigure.AllSources, gofigure.ReportValue, "Application name"))
 	group.Add(gofigure.Required("Mode", "mode", &settings.Mode, gofigure.Flag,
@@ -66,7 +63,7 @@ func Example() {
 	//     Display usage information
 	//
 	//   Config File [-c, --config]
-	//     Path to config file (required)
+	//     Provide configuration from an external JSON file
 	//
 	//   App Name [JSON key: "name", env EXAMPLE_NAME, -n, --name]
 	//     Application name (required)
