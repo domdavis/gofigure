@@ -23,21 +23,21 @@ func ExampleLoad() {
 	// [address:localhost:8000, name:overridden]
 }
 
-func TestLoad(t *testing.T) {
+func TestGet(t *testing.T) {
 	t.Run("An error calling the target will be reported", func(t *testing.T) {
 		t.Parallel()
 
-		_, err := gofigure.Load("https://notfound")
+		_, err := gofigure.Get("https://notfound")
 
-		assert.ErrorIs(t, err, gofigure.ErrLoadingConfig)
+		assert.ErrorIs(t, err, gofigure.ErrLoadingJSON)
 	})
 
 	t.Run("An invalid url will fail", func(t *testing.T) {
 		t.Parallel()
 
-		_, err := gofigure.Load("https://notfound\t")
+		_, err := gofigure.Get("https://notfound\t")
 
-		assert.ErrorIs(t, err, gofigure.ErrLoadingConfig)
+		assert.ErrorIs(t, err, gofigure.ErrLoadingJSON)
 	})
 
 	t.Run("An invalid body will fail", func(t *testing.T) {
@@ -48,9 +48,9 @@ func TestLoad(t *testing.T) {
 				w.Header().Set("Content-Length", "1")
 			}))
 
-		_, err := gofigure.Load(server.URL)
+		_, err := gofigure.Get(server.URL)
 
-		assert.ErrorIs(t, err, gofigure.ErrLoadingConfig)
+		assert.ErrorIs(t, err, gofigure.ErrLoadingJSON)
 	})
 
 	t.Run("Invalid JSON will fail", func(t *testing.T) {
@@ -61,8 +61,8 @@ func TestLoad(t *testing.T) {
 				_, _ = w.Write([]byte(`{"key": `))
 			}))
 
-		_, err := gofigure.Load(server.URL)
+		_, err := gofigure.Get(server.URL)
 
-		assert.ErrorIs(t, err, gofigure.ErrParsingConfig)
+		assert.ErrorIs(t, err, gofigure.ErrParsingJSON)
 	})
 }
