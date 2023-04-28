@@ -11,32 +11,26 @@ import (
 	"strings"
 )
 
-// ErrLoadingConfig is returned if a config file cannot be read from the
-// path or URL given.
-var ErrLoadingConfig = errors.New("error loading config")
+// ErrLoadingJSON is returned if an external file cannot be read from the path
+// or URL given.
+var ErrLoadingJSON = errors.New("error loading JSON")
 
-// ErrParsingConfig is returned if the config file is not valid JSON.
-var ErrParsingConfig = errors.New("error parsing config")
+// ErrParsingJSON is returned if the external file is not valid JSON.
+var ErrParsingJSON = errors.New("error parsing JSON")
+
+// ErrLoadingConfig is given to a ConfigError if Load fails.
+var ErrLoadingConfig = errors.New("error loading config")
 
 // Load external Options from a URI. The external file can be any JSON
 // object.
 func Load(uri string) (Options, error) {
-	var data map[string]any
-
 	options := Options{}
-	f := os.ReadFile
 
-	if strings.HasPrefix(uri, "http://") || strings.HasPrefix(uri, "https://") {
-		f = get
-	}
+	data, err := Get(uri)
 
-	if b, err := f(uri); err != nil {
+	if err != nil {
 		return options, NewConfigError(ErrLoadingConfig,
-			fmt.Errorf("%w from %q: %s", ErrLoadingConfig, uri, err.Error()),
-			Parameter{Name: uri, Source: configFile})
-	} else if err = json.Unmarshal(b, &data); err != nil {
-		return options, NewConfigError(ErrLoadingConfig,
-			fmt.Errorf("%w %q: %s", ErrParsingConfig, uri, err.Error()),
+			fmt.Errorf("failed to get external config: %w", err),
 			Parameter{Name: uri, Source: configFile})
 	}
 
@@ -45,6 +39,25 @@ func Load(uri string) (Options, error) {
 	}
 
 	return options, nil
+}
+
+// Get a JSON object from an external source.
+func Get(uri string) (map[string]any, error) {
+	var data map[string]any
+
+	f := os.ReadFile
+
+	if strings.HasPrefix(uri, "http://") || strings.HasPrefix(uri, "https://") {
+		f = get
+	}
+
+	if b, err := f(uri); err != nil {
+		return data, fmt.Errorf("%w from %q: %s", ErrLoadingJSON, uri, err.Error())
+	} else if err = json.Unmarshal(b, &data); err != nil {
+		return data, fmt.Errorf("%w %q: %s", ErrParsingJSON, uri, err.Error())
+	}
+
+	return data, nil
 }
 
 func get(uri string) ([]byte, error) {
