@@ -33,6 +33,25 @@ func ExampleCoerce() {
 	// 1 cannot coerce "1": invalid type: int8
 }
 
+func ExampleCast() {
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(1.0, 0))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(1.0, int64(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(1.0, uint(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(1.0, uint64(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(1.0, float64(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(1.0, int8(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast("1.0", 1))
+
+	// Output:
+	// int: 1
+	// int64: 1
+	// uint: 1
+	// uint64: 1
+	// float64: 1
+	// float64: 1
+	// string: 1.0
+}
+
 func ExampleDereference() {
 	i := 1
 
