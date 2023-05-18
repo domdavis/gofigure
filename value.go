@@ -137,7 +137,7 @@ func Assign[T Type](target *T, value any) (err error) {
 		return fmt.Errorf("assignment error: %w", err)
 	}
 
-	*target, ok = value.(T)
+	*target, ok = Cast(value, typeOf).(T)
 
 	if !ok {
 		return ErrInvalidType
@@ -189,6 +189,31 @@ func Coerce(value, typeOf any) (r any, err error) {
 	}
 
 	return r, err
+}
+
+// Cast a float64 value to an integer value. If the value isn't a float64, or
+// the type isn't an integer then Cast will simply return the value.
+func Cast(value, typeOf any) any {
+	f, ok := value.(float64)
+
+	if !ok {
+		return value
+	}
+
+	t := reflect.TypeOf(typeOf)
+
+	switch {
+	case t.Kind() == reflect.Int:
+		return int(f)
+	case t.Kind() == reflect.Int64:
+		return int64(f)
+	case t.Kind() == reflect.Uint:
+		return uint(f)
+	case t.Kind() == reflect.Uint64:
+		return uint64(f)
+	default:
+		return value
+	}
 }
 
 // Dereference a value. If the value isn't a pointer then it is returned as is.

@@ -2,7 +2,6 @@ package gofigure_test
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"bitbucket.org/idomdavis/gofigure"
@@ -15,6 +14,10 @@ func Example() {
 		Address string
 		Timeout time.Duration
 		TLS     bool
+
+		Duration time.Duration
+		Int      int
+		Float    float64
 	}
 
 	config := gofigure.NewConfiguration("EXAMPLE")
@@ -35,6 +38,15 @@ func Example() {
 	group.Add(gofigure.Optional("TLS", "tls", &settings.TLS, false,
 		gofigure.NamedSources, gofigure.ReportValue, "Use TLS"))
 
+	types := config.Group("JSON types")
+
+	types.Add(gofigure.Required("Duration", "duration", &settings.Duration,
+		gofigure.Key, gofigure.ReportValue, "Duration type"))
+	types.Add(gofigure.Required("Int", "int", &settings.Int,
+		gofigure.Key, gofigure.ReportValue, "int type"))
+	types.Add(gofigure.Required("Float", "float", &settings.Float,
+		gofigure.Key, gofigure.ReportValue, "float type"))
+
 	// Ordinarily this would be config.Parse().
 	err := config.ParseUsing([]string{
 		"-c", "testdata/config.json",
@@ -46,7 +58,6 @@ func Example() {
 	if err != nil {
 		fmt.Println(config.Format(err))
 		fmt.Println(config.Usage())
-		os.Exit(-1)
 	}
 
 	fmt.Printf("%v\n\n", settings)
@@ -56,7 +67,7 @@ func Example() {
 	}
 
 	// Output:
-	// {3 example localhost:8000 1m0s false}
+	// {3 example localhost:8000 1m0s false 1h0m0s 0 0}
 	//
 	// usage:
 	//   Help [-h, --help]
@@ -79,4 +90,13 @@ func Example() {
 	//
 	//   TLS [JSON key: "tls", env EXAMPLE_TLS, --tls]
 	//     Use TLS (default: false)
+	//
+	//   Duration [JSON key: "duration"]
+	//     Duration type (required)
+	//
+	//   Int [JSON key: "int"]
+	//     int type (required)
+	//
+	//   Float [JSON key: "float"]
+	//     float type (required)
 }

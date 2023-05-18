@@ -20,7 +20,7 @@ func ExampleLoad() {
 	fmt.Println(d)
 
 	// Output:
-	// [address:localhost:8000, name:overridden]
+	// [address:localhost:8000, duration:1h, float:0, int:0, name:overridden]
 }
 
 func TestGet(t *testing.T) {

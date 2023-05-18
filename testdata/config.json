@@ -1,4 +1,7 @@
 {
   "name": "overridden",
-  "address": "localhost:8000"
+  "address": "localhost:8000",
+  "duration": "1h",
+  "int": 0,
+  "float": 0
 }
