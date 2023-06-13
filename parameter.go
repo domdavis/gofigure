@@ -47,13 +47,20 @@ func NewParameters(name string, sources Source) Parameters {
 	return p
 }
 
-// FullName returns the fully formatted name for the parameter.
+// FullName returns the fully formatted name for the parameter. For most
+// parameter types this is just the name. For Environment variables the prefix
+// is appended if there is one, and all -'s are converted to _'s.
 func (p Parameter) FullName() string {
-	if p.Source != EnvVar || p.Stub == "" {
-		return p.Name
-	}
+	name := strings.ReplaceAll(p.Name, "-", "_")
 
-	return fmt.Sprintf("%s_%s", p.Stub, p.Name)
+	switch {
+	case p.Source != EnvVar:
+		return p.Name
+	case p.Stub == "":
+		return name
+	default:
+		return fmt.Sprintf("%s_%s", p.Stub, name)
+	}
 }
 
 func (p Parameter) String() string {
