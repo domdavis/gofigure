@@ -15,39 +15,65 @@ func ExampleCoerce() {
 	fmt.Println(gofigure.Coerce("1m0s", time.Nanosecond))
 	fmt.Println(gofigure.Coerce("true", false))
 	fmt.Println(gofigure.Coerce("1", 0))
-	fmt.Println(gofigure.Coerce("1", int64(0)))
+	fmt.Println(gofigure.Coerce("8", int8(0)))
+	fmt.Println(gofigure.Coerce("16", int16(0)))
+	fmt.Println(gofigure.Coerce("32", int32(0)))
+	fmt.Println(gofigure.Coerce("64", int64(0)))
 	fmt.Println(gofigure.Coerce("1", uint(0)))
-	fmt.Println(gofigure.Coerce("1", uint64(0)))
-	fmt.Println(gofigure.Coerce("1.1", float64(0)))
-	fmt.Println(gofigure.Coerce("1", int8(0)))
+	fmt.Println(gofigure.Coerce("8", uint8(0)))
+	fmt.Println(gofigure.Coerce("16", uint16(0)))
+	fmt.Println(gofigure.Coerce("32", uint32(0)))
+	fmt.Println(gofigure.Coerce("64", uint64(0)))
+	fmt.Println(gofigure.Coerce("1", float32(0)))
+	fmt.Println(gofigure.Coerce("6.4", float64(0)))
+	fmt.Println(gofigure.Coerce("1", uintptr(0)))
 
 	// Output:
 	// 1 <nil>
 	// 1m0s <nil>
 	// true <nil>
 	// 1 <nil>
+	// 8 <nil>
+	// 16 <nil>
+	// 32 <nil>
+	// 64 <nil>
 	// 1 <nil>
+	// 8 <nil>
+	// 16 <nil>
+	// 32 <nil>
+	// 64 <nil>
 	// 1 <nil>
-	// 1 <nil>
-	// 1.1 <nil>
-	// 1 cannot coerce "1": invalid type: int8
+	// 6.4 <nil>
+	// 1 cannot coerce "1": invalid type: uintptr
 }
 
 func ExampleCast() {
 	fmt.Printf("%T: %[1]v\n", gofigure.Cast(1.0, 0))
-	fmt.Printf("%T: %[1]v\n", gofigure.Cast(1.0, int64(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(8.0, int8(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(16.0, int16(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(32.0, int32(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(64.0, int64(0)))
 	fmt.Printf("%T: %[1]v\n", gofigure.Cast(1.0, uint(0)))
-	fmt.Printf("%T: %[1]v\n", gofigure.Cast(1.0, uint64(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(8.0, uint8(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(16.0, uint16(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(32.0, uint32(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(64.0, uint64(0)))
+	fmt.Printf("%T: %[1]v\n", gofigure.Cast(float32(1.0), float32(0)))
 	fmt.Printf("%T: %[1]v\n", gofigure.Cast(1.0, float64(0)))
-	fmt.Printf("%T: %[1]v\n", gofigure.Cast(1.0, int8(0)))
 	fmt.Printf("%T: %[1]v\n", gofigure.Cast("1.0", 1))
 
 	// Output:
 	// int: 1
-	// int64: 1
+	// int8: 8
+	// int16: 16
+	// int32: 32
+	// int64: 64
 	// uint: 1
-	// uint64: 1
-	// float64: 1
+	// uint8: 8
+	// uint16: 16
+	// uint32: 32
+	// uint64: 64
+	// float32: 1
 	// float64: 1
 	// string: 1.0
 }
@@ -105,8 +131,10 @@ func TestValue_Validate(t *testing.T) {
 
 func TestValue_Assign(t *testing.T) {
 	for _, target := range []any{
-		new(bool), new(int), new(int64), new(uint), new(uint64), new(float64),
-		new(time.Duration), new(gofigure.External),
+		new(bool), new(time.Duration), new(gofigure.External),
+		new(int), new(int8), new(int16), new(int32), new(int64),
+		new(uint), new(uint8), new(uint16), new(uint32), new(uint64),
+		new(float32), new(float64),
 	} {
 		func(target any) {
 			name := fmt.Sprintf("string(%T) assigns to %[1]T", target)
