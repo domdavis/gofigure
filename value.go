@@ -26,7 +26,9 @@ type External string
 
 // Type accepted by gofigure.
 type Type interface {
-	~bool | ~int | ~int64 | ~uint | ~uint64 | ~float64 | ~string
+	~bool | ~float32 | ~float64 | ~string |
+		~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
 }
 
 // Value validation errors.
@@ -67,8 +69,9 @@ func (v *Value) Validate() error {
 	}
 
 	switch v.Ptr.(type) {
-	case *bool, *int, *int64, *uint, *uint64, *float64, *string,
-		*time.Duration, *External:
+	case *bool, *float32, *float64, *string, *time.Duration, *External,
+		*int, *int8, *int16, *int32, *int64,
+		*uint, *uint8, *uint16, *uint32, *uint64:
 	default:
 		return fmt.Errorf("%w for Value %s: %T", ErrInvalidType, v.Name, v.Ptr)
 	}
@@ -79,7 +82,7 @@ func (v *Value) Validate() error {
 // Assign a value to the Value.Ptr, returning an error if the assignment
 // cannot be made.
 //
-//nolint:cyclop // Case switch for all available types.
+//nolint:cyclop,funlen // Case switch for all available types.
 func (v *Value) Assign(value any, source Source) error {
 	err := v.Validate()
 
@@ -92,11 +95,25 @@ func (v *Value) Assign(value any, source Source) error {
 		err = Assign(target, value)
 	case *int:
 		err = Assign(target, value)
+	case *int8:
+		err = Assign(target, value)
+	case *int16:
+		err = Assign(target, value)
+	case *int32:
+		err = Assign(target, value)
 	case *int64:
 		err = Assign(target, value)
 	case *uint:
 		err = Assign(target, value)
+	case *uint8:
+		err = Assign(target, value)
+	case *uint16:
+		err = Assign(target, value)
+	case *uint32:
+		err = Assign(target, value)
 	case *uint64:
+		err = Assign(target, value)
+	case *float32:
 		err = Assign(target, value)
 	case *float64:
 		err = Assign(target, value)
@@ -150,7 +167,7 @@ func Assign[T Type](target *T, value any) (err error) {
 // are simply returned as is. If the string value cannot be coerced to the type
 // an error is returned.
 //
-//nolint:cyclop // Case switch for all available types.
+//nolint:cyclop,funlen // Case switch for all available types.
 func Coerce(value, typeOf any) (r any, err error) {
 	s, ok := value.(string)
 
@@ -168,13 +185,34 @@ func Coerce(value, typeOf any) (r any, err error) {
 	case t.Kind() == reflect.Int:
 		v, e := strconv.ParseInt(s, 10, 64)
 		r, err = int(v), e
+	case t.Kind() == reflect.Int8:
+		v, e := strconv.ParseInt(s, 10, 64)
+		r, err = int8(v), e
+	case t.Kind() == reflect.Int16:
+		v, e := strconv.ParseInt(s, 10, 64)
+		r, err = int16(v), e
+	case t.Kind() == reflect.Int32:
+		v, e := strconv.ParseInt(s, 10, 64)
+		r, err = int32(v), e
 	case t.Kind() == reflect.Int64:
 		r, err = strconv.ParseInt(s, 10, 64)
 	case t.Kind() == reflect.Uint:
 		v, e := strconv.ParseUint(s, 10, 64)
 		r, err = uint(v), e
+	case t.Kind() == reflect.Uint8:
+		v, e := strconv.ParseInt(s, 10, 64)
+		r, err = uint8(v), e
+	case t.Kind() == reflect.Uint16:
+		v, e := strconv.ParseInt(s, 10, 64)
+		r, err = uint16(v), e
+	case t.Kind() == reflect.Uint32:
+		v, e := strconv.ParseInt(s, 10, 64)
+		r, err = uint32(v), e
 	case t.Kind() == reflect.Uint64:
 		r, err = strconv.ParseUint(s, 10, 64)
+	case t.Kind() == reflect.Float32:
+		v, e := strconv.ParseFloat(s, 32)
+		r, err = float32(v), e
 	case t.Kind() == reflect.Float64:
 		r, err = strconv.ParseFloat(s, 64)
 	case t.Kind() == reflect.String:
@@ -193,6 +231,8 @@ func Coerce(value, typeOf any) (r any, err error) {
 
 // Cast a float64 value to an integer value. If the value isn't a float64, or
 // the type isn't an integer then Cast will simply return the value.
+//
+//nolint:cyclop // Case switch for all supported types.
 func Cast(value, typeOf any) any {
 	f, ok := value.(float64)
 
@@ -205,10 +245,22 @@ func Cast(value, typeOf any) any {
 	switch {
 	case t.Kind() == reflect.Int:
 		return int(f)
+	case t.Kind() == reflect.Int8:
+		return int8(f)
+	case t.Kind() == reflect.Int16:
+		return int16(f)
+	case t.Kind() == reflect.Int32:
+		return int32(f)
 	case t.Kind() == reflect.Int64:
 		return int64(f)
 	case t.Kind() == reflect.Uint:
 		return uint(f)
+	case t.Kind() == reflect.Uint8:
+		return uint8(f)
+	case t.Kind() == reflect.Uint16:
+		return uint16(f)
+	case t.Kind() == reflect.Uint32:
+		return uint32(f)
 	case t.Kind() == reflect.Uint64:
 		return uint64(f)
 	default:
