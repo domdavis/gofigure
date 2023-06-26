@@ -1,0 +1,22 @@
+version: '3'
+
+tasks:
+  clean:
+    cmds:
+      - go clean
+      - go mod tidy
+  lint:
+    cmds:
+      - golangci-lint run
+  build:
+    cmds:
+      - task: clean
+      - go build ./...
+  test:
+    cmds:
+      - go test -covermode=count ./...
+  check:
+    cmds:
+      - task: build
+      - task: test
+      - task: lint

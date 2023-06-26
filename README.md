@@ -1,6 +1,6 @@
 # Go figure!
 
-![Build](https://img.shields.io/github/actions/workflow/status/domdavis/gofigure/go.yml)
+![Build](https://img.shields.io/github/actions/workflow/status/domdavis/gofigure/build.yml)
 ![Issues](https://img.shields.io/github/issues/domdavis/gofigure?style=plastic)
 ![Pull Requests](https://img.shields.io/github/issues-pr/domdavis/gofigure?style=plastic)
 [![Go Doc](http://img.shields.io/badge/godoc-reference-5272B4.svg?style=plastic)](http://godoc.org/bitbucket.org.idomdavis/gofigure)
