@@ -11,7 +11,16 @@ tasks:
   build:
     cmds:
       - task: clean
-      - go build ./...
+      - |
+        go build -ldflags \
+        "\
+        -X {{.package}}.BuildTime={{now | date "2006/01/02/15:04:05"}} \
+        -X {{.package}}.CommitHash={{or .GITHUB_SHA .BITBUCKET_COMMIT "local"}} \
+        -X {{.package}}.Identifier={{or .GITHUB_REF_NAME .BITBUCKET_TAG .BITBUCKET_BRANCH "local"}} \
+        " \
+        ./...
+    vars:
+      package: github.com/domdavis/gofigure
   test:
     cmds:
       - go test -covermode=count ./...

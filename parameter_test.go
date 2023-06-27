@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"bitbucket.org/idomdavis/gofigure"
+	"github.com/domdavis/gofigure"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -1,4 +1,4 @@
-module bitbucket.org/idomdavis/gofigure
+module github.com/domdavis/gofigure
 
 go 1.20
 

@@ -3,7 +3,7 @@ package gofigure_test
 import (
 	"fmt"
 
-	"bitbucket.org/idomdavis/gofigure"
+	"github.com/domdavis/gofigure"
 )
 
 func ExampleGroup_Values() {

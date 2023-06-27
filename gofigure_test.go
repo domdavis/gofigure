@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"bitbucket.org/idomdavis/gofigure"
+	"github.com/domdavis/gofigure"
 )
 
 func Example() {

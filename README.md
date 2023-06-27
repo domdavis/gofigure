@@ -13,7 +13,7 @@ the details and just say "Go figure!".
 ## Usage
 
 ```sh
-go get -u bitbucket.org/idomdavis/gofigure
+go get -u github.com/domdavis/gofigure
 ```
 
 See [gofigure_test.go]() for example usage.

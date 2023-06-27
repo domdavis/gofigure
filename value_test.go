@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"bitbucket.org/idomdavis/gofigure"
+	"github.com/domdavis/gofigure"
 	"github.com/stretchr/testify/assert"
 )
 
