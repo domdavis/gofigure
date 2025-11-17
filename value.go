@@ -3,6 +3,7 @@ package gofigure
 import (
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"time"
@@ -24,12 +25,24 @@ type Value struct {
 // External types hold a path to an external configuration file.
 type External string
 
-// Type accepted by gofigure.
-type Type interface {
-	~bool | ~float32 | ~float64 | ~string |
-		~int | ~int8 | ~int16 | ~int32 | ~int64 |
-		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
+// Int types accepted by gofigure.
+type Int interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64
 }
+
+// Uint types accepted by gofigure.
+type Uint interface {
+	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
+}
+
+// Float types accepted by gofigure.
+type Float interface{ ~float32 | ~float64 }
+
+// Numeric types accepted by gofigure.
+type Numeric interface{ Int | Uint | Float }
+
+// Type accepted by gofigure.
+type Type interface{ ~bool | ~string | Numeric }
 
 // Value validation errors.
 var (
@@ -140,7 +153,7 @@ func (v *Value) Assign(value any, source Source) error {
 	return nil
 }
 
-// Assign the value to the target, returning an error if assignment fails.
+// Assign the value to the target, returning an error if the assignment fails.
 // Assign will attempt to coerce string values to the correct type.
 func Assign[T Type](target *T, value any) (err error) {
 	var (
@@ -183,30 +196,30 @@ func Coerce(value, typeOf any) (r any, err error) {
 	case t.Kind() == reflect.Bool:
 		r, err = strconv.ParseBool(s)
 	case t.Kind() == reflect.Int:
-		v, e := strconv.ParseInt(s, 10, 64)
+		v, e := strconv.ParseInt(s, 10, 0)
 		r, err = int(v), e
 	case t.Kind() == reflect.Int8:
-		v, e := strconv.ParseInt(s, 10, 64)
+		v, e := strconv.ParseInt(s, 10, 8)
 		r, err = int8(v), e
 	case t.Kind() == reflect.Int16:
-		v, e := strconv.ParseInt(s, 10, 64)
+		v, e := strconv.ParseInt(s, 10, 16)
 		r, err = int16(v), e
 	case t.Kind() == reflect.Int32:
-		v, e := strconv.ParseInt(s, 10, 64)
+		v, e := strconv.ParseInt(s, 10, 32)
 		r, err = int32(v), e
 	case t.Kind() == reflect.Int64:
 		r, err = strconv.ParseInt(s, 10, 64)
 	case t.Kind() == reflect.Uint:
-		v, e := strconv.ParseUint(s, 10, 64)
+		v, e := strconv.ParseUint(s, 10, 0)
 		r, err = uint(v), e
 	case t.Kind() == reflect.Uint8:
-		v, e := strconv.ParseInt(s, 10, 64)
+		v, e := strconv.ParseUint(s, 10, 8)
 		r, err = uint8(v), e
 	case t.Kind() == reflect.Uint16:
-		v, e := strconv.ParseInt(s, 10, 64)
+		v, e := strconv.ParseUint(s, 10, 16)
 		r, err = uint16(v), e
 	case t.Kind() == reflect.Uint32:
-		v, e := strconv.ParseInt(s, 10, 64)
+		v, e := strconv.ParseUint(s, 10, 32)
 		r, err = uint32(v), e
 	case t.Kind() == reflect.Uint64:
 		r, err = strconv.ParseUint(s, 10, 64)
@@ -229,43 +242,52 @@ func Coerce(value, typeOf any) (r any, err error) {
 	return r, err
 }
 
-// Cast a float64 value to an integer value. If the value isn't a float64, or
-// the type isn't an integer then Cast will simply return the value.
+// Cast a numeric value to the target type. Handles float64 and int conversions
+// to appropriately sized integer types. If the value isn't numeric, Cast will
+// simply return the value.
 //
-//nolint:cyclop // Case switch for all supported types.
+//nolint:gosec // Bounds checking is handled before the cast.
 func Cast(value, typeOf any) any {
-	f, ok := value.(float64)
+	type clamp struct {
+		max uint
+		min int
+		f   func(i int) any
+	}
 
-	if !ok {
+	var ranges = map[reflect.Kind]clamp{
+		reflect.Int:    {max: math.MaxInt, min: math.MinInt, f: func(i int) any { return i }},
+		reflect.Int8:   {max: math.MaxInt8, min: math.MinInt8, f: func(i int) any { return int8(i) }},
+		reflect.Int16:  {max: math.MaxInt16, min: math.MinInt16, f: func(i int) any { return int16(i) }},
+		reflect.Int32:  {max: math.MaxInt32, min: math.MinInt32, f: func(i int) any { return int32(i) }},
+		reflect.Int64:  {max: math.MaxInt64, min: math.MinInt64, f: func(i int) any { return int64(i) }},
+		reflect.Uint:   {max: math.MaxUint, min: 0, f: func(i int) any { return uint(i) }},
+		reflect.Uint8:  {max: math.MaxUint8, min: 0, f: func(i int) any { return uint8(i) }},
+		reflect.Uint16: {max: math.MaxUint16, min: 0, f: func(i int) any { return uint16(i) }},
+		reflect.Uint32: {max: math.MaxUint32, min: 0, f: func(i int) any { return uint32(i) }},
+		reflect.Uint64: {max: math.MaxUint64, min: 0, f: func(i int) any { return uint64(i) }},
+	}
+
+	var v int
+
+	if f, float := value.(float64); float {
+		v = int(f)
+	} else if i, integer := value.(int); integer {
+		v = i
+	} else {
 		return value
 	}
 
-	t := reflect.TypeOf(typeOf)
+	c, clampable := ranges[reflect.TypeOf(typeOf).Kind()]
 
-	switch {
-	case t.Kind() == reflect.Int:
-		return int(f)
-	case t.Kind() == reflect.Int8:
-		return int8(f)
-	case t.Kind() == reflect.Int16:
-		return int16(f)
-	case t.Kind() == reflect.Int32:
-		return int32(f)
-	case t.Kind() == reflect.Int64:
-		return int64(f)
-	case t.Kind() == reflect.Uint:
-		return uint(f)
-	case t.Kind() == reflect.Uint8:
-		return uint8(f)
-	case t.Kind() == reflect.Uint16:
-		return uint16(f)
-	case t.Kind() == reflect.Uint32:
-		return uint32(f)
-	case t.Kind() == reflect.Uint64:
-		return uint64(f)
-	default:
+	if !clampable {
 		return value
 	}
+
+	if v < c.min || uint(v) > c.max {
+		return value
+	}
+
+	return c.f(v)
 }
 
 // Dereference a value. If the value isn't a pointer then it is returned as is.

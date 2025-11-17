@@ -76,7 +76,6 @@ func get(uri string) ([]byte, error) {
 			"failed to get external config from %s: %w", uri, err)
 	}
 
-	//nolint:errcheck // Not a huge amount we can do here.
 	defer func() { _ = r.Body.Close() }()
 
 	b, err := io.ReadAll(r.Body)

@@ -2,6 +2,7 @@ package gofigure_test
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"testing"
 	"time"
@@ -226,5 +227,211 @@ func TestAssign(t *testing.T) {
 		err := gofigure.Assign(&setting, "s")
 
 		assert.ErrorIs(t, err, strconv.ErrSyntax)
+	})
+}
+
+func TestIntegerOverflow(t *testing.T) {
+	t.Run("int8 overflow positive", func(t *testing.T) {
+		t.Parallel()
+
+		var i int8
+
+		err := gofigure.Assign(&i, math.MaxInt8+1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("int8 overflow negative", func(t *testing.T) {
+		t.Parallel()
+
+		var i int8
+
+		err := gofigure.Assign(&i, math.MinInt8-1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("int16 overflow positive", func(t *testing.T) {
+		t.Parallel()
+
+		var i int16
+
+		err := gofigure.Assign(&i, math.MaxInt16+1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("int16 overflow negative", func(t *testing.T) {
+		t.Parallel()
+
+		var i int16
+
+		err := gofigure.Assign(&i, math.MinInt16-1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("int32 overflow positive", func(t *testing.T) {
+		t.Parallel()
+
+		var i int32
+
+		err := gofigure.Assign(&i, math.MaxInt32+1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("int32 overflow negative", func(t *testing.T) {
+		t.Parallel()
+
+		var i int32
+
+		err := gofigure.Assign(&i, math.MinInt32-1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("uint8 overflow positive", func(t *testing.T) {
+		t.Parallel()
+
+		var i uint8
+
+		err := gofigure.Assign(&i, math.MaxUint8+1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("uint8 negative value", func(t *testing.T) {
+		t.Parallel()
+
+		var i uint8
+
+		err := gofigure.Assign(&i, -1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("uint16 overflow positive", func(t *testing.T) {
+		t.Parallel()
+
+		var i uint16
+
+		err := gofigure.Assign(&i, math.MaxUint16+1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("uint16 negative value", func(t *testing.T) {
+		t.Parallel()
+
+		var i uint16
+
+		err := gofigure.Assign(&i, -1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("uint32 overflow positive", func(t *testing.T) {
+		t.Parallel()
+
+		var i uint32
+
+		err := gofigure.Assign(&i, math.MaxUint32+1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("uint32 negative value", func(t *testing.T) {
+		t.Parallel()
+
+		var i uint32
+
+		err := gofigure.Assign(&i, -1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("int8 valid boundary values", func(t *testing.T) {
+		t.Parallel()
+
+		var minimum, maximum int8
+
+		errMin := gofigure.Assign(&minimum, int8(math.MinInt8))
+		errMax := gofigure.Assign(&maximum, int8(math.MaxInt8))
+
+		assert.NoError(t, errMin)
+		assert.NoError(t, errMax)
+		assert.Equal(t, int8(math.MinInt8), minimum)
+		assert.Equal(t, int8(math.MaxInt8), maximum)
+	})
+
+	t.Run("uint8 valid boundary values", func(t *testing.T) {
+		t.Parallel()
+
+		var minimum, maximum uint8
+
+		errMin := gofigure.Assign(&minimum, uint8(0))
+		errMax := gofigure.Assign(&maximum, uint8(math.MaxUint8))
+
+		assert.NoError(t, errMin)
+		assert.NoError(t, errMax)
+		assert.Equal(t, uint8(0), minimum)
+		assert.Equal(t, uint8(math.MaxUint8), maximum)
+	})
+
+	t.Run("int16 valid boundary values", func(t *testing.T) {
+		t.Parallel()
+
+		var minimum, maximum int16
+
+		errMin := gofigure.Assign(&minimum, int16(math.MinInt8))
+		errMax := gofigure.Assign(&maximum, int16(math.MaxInt8))
+
+		assert.NoError(t, errMin)
+		assert.NoError(t, errMax)
+		assert.Equal(t, int16(math.MinInt8), minimum)
+		assert.Equal(t, int16(math.MaxInt8), maximum)
+	})
+
+	t.Run("uint16 valid boundary values", func(t *testing.T) {
+		t.Parallel()
+
+		var minimum, maximum uint16
+
+		errMin := gofigure.Assign(&minimum, uint16(0))
+		errMax := gofigure.Assign(&maximum, uint16(math.MaxUint16))
+
+		assert.NoError(t, errMin)
+		assert.NoError(t, errMax)
+		assert.Equal(t, uint16(0), minimum)
+		assert.Equal(t, uint16(math.MaxUint16), maximum)
+	})
+
+	t.Run("int32 valid boundary values", func(t *testing.T) {
+		t.Parallel()
+
+		var minimum, maximum int32
+
+		errMin := gofigure.Assign(&minimum, int32(math.MinInt8))
+		errMax := gofigure.Assign(&maximum, int32(math.MaxInt8))
+
+		assert.NoError(t, errMin)
+		assert.NoError(t, errMax)
+		assert.Equal(t, int32(math.MinInt8), minimum)
+		assert.Equal(t, int32(math.MaxInt8), maximum)
+	})
+
+	t.Run("uint32 valid boundary values", func(t *testing.T) {
+		t.Parallel()
+
+		var minimum, maximum uint32
+
+		errMin := gofigure.Assign(&minimum, uint32(0))
+		errMax := gofigure.Assign(&maximum, uint32(math.MaxUint32))
+
+		assert.NoError(t, errMin)
+		assert.NoError(t, errMax)
+		assert.Equal(t, uint32(0), minimum)
+		assert.Equal(t, uint32(math.MaxUint32), maximum)
 	})
 }
