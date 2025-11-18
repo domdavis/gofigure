@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 // ErrLoadingJSON is returned if an external file cannot be read from the path
@@ -20,6 +22,23 @@ var ErrParsingJSON = errors.New("error parsing JSON")
 
 // ErrLoadingConfig is given to a ConfigError if Load fails.
 var ErrLoadingConfig = errors.New("error loading config")
+
+const (
+	// Maximum size for remote configuration files (10MB).
+	maxConfigSize = 10 * 1024 * 1024
+
+	// HTTP client timeout for the entire request (30 seconds).
+	httpTimeout = 30 * time.Second
+
+	// Connection timeout (10 seconds).
+	dialTimeout = 10 * time.Second
+
+	// TLS handshake timeout (10 seconds).
+	tlsTimeout = 10 * time.Second
+
+	// Timeout for reading response headers (10 seconds).
+	responseHeaderTimeout = 10 * time.Second
+)
 
 // Load external Options from a URI. The external file can be any JSON
 // object.
@@ -52,15 +71,28 @@ func Get(uri string) (map[string]any, error) {
 	}
 
 	if b, err := f(uri); err != nil {
-		return data, fmt.Errorf("%w from %q: %s", ErrLoadingJSON, uri, err.Error())
+		return data, fmt.Errorf("%w from %q: %w", ErrLoadingJSON, uri, err)
 	} else if err = json.Unmarshal(b, &data); err != nil {
-		return data, fmt.Errorf("%w %q: %s", ErrParsingJSON, uri, err.Error())
+		return data, fmt.Errorf("%w %q: %w", ErrParsingJSON, uri, err)
 	}
 
 	return data, nil
 }
 
 func get(uri string) ([]byte, error) {
+	client := &http.Client{
+		Timeout: httpTimeout,
+		Transport: &http.Transport{
+			DialContext: (&net.Dialer{
+				Timeout:   dialTimeout,
+				KeepAlive: dialTimeout,
+			}).DialContext,
+			TLSHandshakeTimeout:   tlsTimeout,
+			ResponseHeaderTimeout: responseHeaderTimeout,
+			ExpectContinueTimeout: 1 * time.Second,
+		},
+	}
+
 	ctx := context.Background()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 
@@ -69,7 +101,7 @@ func get(uri string) ([]byte, error) {
 			"failed to request external config from %s: %w", uri, err)
 	}
 
-	r, err := http.DefaultClient.Do(req)
+	r, err := client.Do(req)
 
 	if err != nil {
 		return []byte{}, fmt.Errorf(
@@ -78,11 +110,23 @@ func get(uri string) ([]byte, error) {
 
 	defer func() { _ = r.Body.Close() }()
 
-	b, err := io.ReadAll(r.Body)
+	if r.StatusCode != http.StatusOK {
+		return []byte{}, fmt.Errorf(
+			"%w: config fetch from %s failed with status %d: %s",
+			ErrLoadingConfig, uri, r.StatusCode, r.Status)
+	}
+
+	b, err := io.ReadAll(io.LimitReader(r.Body, maxConfigSize))
 
 	if err != nil {
 		return []byte{}, fmt.Errorf(
 			"failed to read external config from %s: %w", uri, err)
+	}
+
+	if len(b) >= maxConfigSize {
+		return []byte{}, fmt.Errorf(
+			"%w: config file from %s exceeds maximum size of %d bytes",
+			ErrLoadingConfig, uri, maxConfigSize)
 	}
 
 	return b, nil

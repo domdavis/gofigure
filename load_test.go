@@ -65,4 +65,51 @@ func TestGet(t *testing.T) {
 
 		assert.ErrorIs(t, err, gofigure.ErrParsingJSON)
 	})
+
+	t.Run("HTTP 404 status will fail", func(t *testing.T) {
+		t.Parallel()
+
+		server := httptest.NewServer(http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusNotFound)
+			}))
+
+		_, err := gofigure.Get(server.URL)
+
+		assert.ErrorIs(t, err, gofigure.ErrLoadingJSON)
+		assert.ErrorIs(t, err, gofigure.ErrLoadingConfig)
+	})
+
+	t.Run("HTTP 500 status will fail", func(t *testing.T) {
+		t.Parallel()
+
+		server := httptest.NewServer(http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			}))
+
+		_, err := gofigure.Get(server.URL)
+
+		assert.ErrorIs(t, err, gofigure.ErrLoadingJSON)
+		assert.ErrorIs(t, err, gofigure.ErrLoadingConfig)
+	})
+
+	t.Run("Config exceeding maximum size will fail", func(t *testing.T) {
+		t.Parallel()
+
+		server := httptest.NewServer(http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				data := make([]byte, 11*1024*1024)
+				for i := range data {
+					data[i] = 'a'
+				}
+				_, _ = w.Write(data)
+			}))
+
+		_, err := gofigure.Get(server.URL)
+
+		assert.ErrorIs(t, err, gofigure.ErrLoadingJSON)
+		assert.ErrorIs(t, err, gofigure.ErrLoadingConfig)
+	})
 }
