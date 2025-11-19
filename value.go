@@ -52,8 +52,16 @@ var (
 	ErrInvalidType        = errors.New("invalid type")
 )
 
-// NewValue returns a new, valid value. An empty name, description, or an
-// invalid ptr will result in a panic.
+// NewValue returns a new, valid value.
+//
+// NewValue panics if:
+//   - name is empty
+//   - description is empty
+//   - ptr is nil
+//   - ptr points to an invalid type
+//
+// These panics indicate programming errors (invalid arguments) and should be
+// caught during development and testing.
 func NewValue[T Type](name string, ptr *T, value T, source Source, description string) *Value {
 	s := &Value{Name: name, Description: description, Ptr: ptr, Source: source}
 
