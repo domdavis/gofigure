@@ -435,3 +435,115 @@ func TestIntegerOverflow(t *testing.T) {
 		assert.Equal(t, uint32(math.MaxUint32), maximum)
 	})
 }
+
+func TestFloatPrecision(t *testing.T) {
+	t.Run("float32 maximum value", func(t *testing.T) {
+		t.Parallel()
+
+		var f float32
+
+		err := gofigure.Assign(&f, float32(math.MaxFloat32))
+
+		assert.NoError(t, err)
+		assert.Equal(t, float32(math.MaxFloat32), f)
+	})
+
+	t.Run("float32 smallest nonzero value", func(t *testing.T) {
+		t.Parallel()
+
+		var f float32
+
+		err := gofigure.Assign(&f, float32(math.SmallestNonzeroFloat32))
+
+		assert.NoError(t, err)
+		assert.Equal(t, float32(math.SmallestNonzeroFloat32), f)
+	})
+
+	t.Run("float32 scientific notation", func(t *testing.T) {
+		t.Parallel()
+
+		var f float32
+
+		err := gofigure.Assign(&f, "1.23e-4")
+
+		assert.NoError(t, err)
+		assert.InDelta(t, 0.000123, f, 0.0000001)
+	})
+
+	t.Run("float32 large scientific notation", func(t *testing.T) {
+		t.Parallel()
+
+		var f float32
+
+		err := gofigure.Assign(&f, "1.23e10")
+
+		assert.NoError(t, err)
+		assert.InDelta(t, 12300000000.0, f, 1000.0)
+	})
+
+	t.Run("float64 maximum value", func(t *testing.T) {
+		t.Parallel()
+
+		var f float64
+
+		err := gofigure.Assign(&f, math.MaxFloat64)
+
+		assert.NoError(t, err)
+		assert.Equal(t, math.MaxFloat64, f)
+	})
+
+	t.Run("float64 smallest nonzero value", func(t *testing.T) {
+		t.Parallel()
+
+		var f float64
+
+		err := gofigure.Assign(&f, math.SmallestNonzeroFloat64)
+
+		assert.NoError(t, err)
+		assert.Equal(t, math.SmallestNonzeroFloat64, f)
+	})
+
+	t.Run("float64 scientific notation", func(t *testing.T) {
+		t.Parallel()
+
+		var f float64
+
+		err := gofigure.Assign(&f, "1.23456789e-10")
+
+		assert.NoError(t, err)
+		assert.InDelta(t, 0.000000000123456789, f, 1e-18)
+	})
+
+	t.Run("float64 large scientific notation", func(t *testing.T) {
+		t.Parallel()
+
+		var f float64
+
+		err := gofigure.Assign(&f, "9.87654321e15")
+
+		assert.NoError(t, err)
+		assert.InDelta(t, 9876543210000000.0, f, 1.0)
+	})
+
+	t.Run("float32 negative scientific notation", func(t *testing.T) {
+		t.Parallel()
+
+		var f float32
+
+		err := gofigure.Assign(&f, "-5.67e-3")
+
+		assert.NoError(t, err)
+		assert.InDelta(t, -0.00567, f, 0.0000001)
+	})
+
+	t.Run("float64 negative scientific notation", func(t *testing.T) {
+		t.Parallel()
+
+		var f float64
+
+		err := gofigure.Assign(&f, "-3.14159e20")
+
+		assert.NoError(t, err)
+		assert.InDelta(t, -3.14159e20, f, 1e10)
+	})
+}

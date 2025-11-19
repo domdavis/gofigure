@@ -82,6 +82,7 @@ func GetWithContext(ctx context.Context, uri string) (map[string]any, error) {
 	if strings.HasPrefix(uri, "http://") || strings.HasPrefix(uri, "https://") {
 		b, err = get(ctx, uri)
 	} else {
+		//nolint:gosec // We want to include a file from a variable.
 		b, err = os.ReadFile(uri)
 	}
 
