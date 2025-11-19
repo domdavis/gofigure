@@ -1,10 +1,12 @@
 package gofigure_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/domdavis/gofigure"
 	"github.com/stretchr/testify/assert"
@@ -111,5 +113,42 @@ func TestGet(t *testing.T) {
 
 		assert.ErrorIs(t, err, gofigure.ErrLoadingJSON)
 		assert.ErrorIs(t, err, gofigure.ErrLoadingConfig)
+	})
+
+	t.Run("Cancelled context will fail", func(t *testing.T) {
+		t.Parallel()
+
+		server := httptest.NewServer(http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"key": "value"}`))
+			}))
+
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel()
+
+		_, err := gofigure.GetWithContext(ctx, server.URL)
+
+		assert.ErrorIs(t, err, gofigure.ErrLoadingJSON)
+		assert.ErrorIs(t, err, context.Canceled)
+	})
+
+	t.Run("Context timeout will fail", func(t *testing.T) {
+		t.Parallel()
+
+		server := httptest.NewServer(http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				time.Sleep(100 * time.Millisecond)
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"key": "value"}`))
+			}))
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+		defer cancel()
+
+		_, err := gofigure.GetWithContext(ctx, server.URL)
+
+		assert.ErrorIs(t, err, gofigure.ErrLoadingJSON)
+		assert.ErrorIs(t, err, context.DeadlineExceeded)
 	})
 }

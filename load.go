@@ -43,9 +43,15 @@ const (
 // Load external Options from a URI. The external file can be any JSON
 // object.
 func Load(uri string) (Options, error) {
+	return LoadWithContext(context.Background(), uri)
+}
+
+// LoadWithContext loads external Options from a URI with context support for
+// cancellation and timeout control. The external file can be any JSON object.
+func LoadWithContext(ctx context.Context, uri string) (Options, error) {
 	options := Options{}
 
-	data, err := Get(uri)
+	data, err := GetWithContext(ctx, uri)
 
 	if err != nil {
 		return options, NewConfigError(ErrLoadingConfig,
@@ -62,24 +68,35 @@ func Load(uri string) (Options, error) {
 
 // Get a JSON object from an external source.
 func Get(uri string) (map[string]any, error) {
+	return GetWithContext(context.Background(), uri)
+}
+
+// GetWithContext retrieves a JSON object from an external source with context
+// support for cancellation and timeout control.
+func GetWithContext(ctx context.Context, uri string) (map[string]any, error) {
 	var data map[string]any
 
-	f := os.ReadFile
+	var b []byte
+	var err error
 
 	if strings.HasPrefix(uri, "http://") || strings.HasPrefix(uri, "https://") {
-		f = get
+		b, err = get(ctx, uri)
+	} else {
+		b, err = os.ReadFile(uri)
 	}
 
-	if b, err := f(uri); err != nil {
+	if err != nil {
 		return data, fmt.Errorf("%w from %q: %w", ErrLoadingJSON, uri, err)
-	} else if err = json.Unmarshal(b, &data); err != nil {
+	}
+
+	if err = json.Unmarshal(b, &data); err != nil {
 		return data, fmt.Errorf("%w %q: %w", ErrParsingJSON, uri, err)
 	}
 
 	return data, nil
 }
 
-func get(uri string) ([]byte, error) {
+func get(ctx context.Context, uri string) ([]byte, error) {
 	client := &http.Client{
 		Timeout: httpTimeout,
 		Transport: &http.Transport{
@@ -93,7 +110,6 @@ func get(uri string) ([]byte, error) {
 		},
 	}
 
-	ctx := context.Background()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 
 	if err != nil {
