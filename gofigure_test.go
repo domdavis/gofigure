@@ -67,7 +67,7 @@ func Example() {
 	}
 
 	// Output:
-	// {3 example localhost:8000 1m0s false 1h0m0s 0 0}
+	// {3 example localhost:8000 1m0s false 1h0m0s 12 12.3}
 	//
 	// usage:
 	//   Help [-h, --help]

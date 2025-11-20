@@ -1,5 +1,6 @@
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
     - asciicheck
     - bidichk
@@ -8,15 +9,14 @@ linters:
     - dogsled
     - dupl
     - durationcheck
+    - err113
     - errcheck
     - errchkjson
     - errname
     - errorlint
     - exhaustive
-    - exportloopref
     - forcetypeassert
     - funlen
-    - gci
     - gochecknoglobals
     - gochecknoinits
     - gocognit
@@ -24,21 +24,15 @@ linters:
     - gocritic
     - godot
     - godox
-    - goerr113
-    - gofmt
-    - goimports
-    - gomnd
     - gomoddirectives
     - goprintffuncname
     - gosec
-    - gosimple
     - govet
-    - importas
     - ineffassign
-    - ireturn
     - lll
     - maintidx
     - misspell
+    - mnd
     - nakedret
     - nestif
     - nilerr
@@ -48,109 +42,123 @@ linters:
     - nolintlint
     - paralleltest
     - predeclared
-    - stylecheck
+    - staticcheck
     - tagliatelle
-    - tenv
     - testpackage
     - thelper
-    - typecheck
     - unconvert
     - unused
     - whitespace
     - wrapcheck
-    - wsl
-
-linters-settings:
-  cyclop:
-    skip-tests: true
-  decorder:
-    dec-order:
-      - type
-      - var
-      - const
-      - func
-    disable-dec-order-check: false
-  dupl:
-    threshold: 100
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-    exclude-functions:
-      - encoding/json.Marshal
-      - encoding/json.MarshalIndent
-  errchkjson:
-    check-error-free-encoding: true
-    report-no-exported: true
-  exhaustive:
-    default-signifies-exhaustive: true
-  godot:
-    scope: all
-  gomnd:
-    ignored-functions:
-      - 'strconv.Parse*'
-  govet:
-    check-shadowing: true
-    enable-all: true
-    disable:
-      - fieldalignment
-  importas:
-    no-extra-aliases: true
-  ireturn:
-    allow:
-      - anon
-      - error
-      - empty
-      - stdlib
-      - ^([A-Z])$
-  lll:
-    line-length: 120
-    tab-width: 4
-  maligned:
-    suggest-new: true
-  misspell:
-    locale: UK
-    ignore-words:
-      - davisd
-      - color
-  nakedret:
-    max-func-lines: 0
-  nestif:
-    min-complexity: 4
-  nolintlint:
-    allow-leading-space: false
-    require-explanation: true
-    require-specific: true
-  stylecheck:
-    checks:
-      - all
-    http-status-code-whitelist: []
-  tenv:
-    all: true
-
+    - wsl_v5
+  settings:
+    decorder:
+      dec-order:
+        - type
+        - var
+        - const
+        - func
+      disable-dec-order-check: false
+    dupl:
+      threshold: 100
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+      exclude-functions:
+        - encoding/json.Marshal
+        - encoding/json.MarshalIndent
+        - (io.ReadCloser).Close
+        - (*database/sql.Rows).Close
+        - (*encoding/csv.Writer).Write
+    errchkjson:
+      check-error-free-encoding: true
+      report-no-exported: true
+    exhaustive:
+      default-signifies-exhaustive: true
+    godot:
+      scope: all
+    govet:
+      disable:
+        - fieldalignment
+      enable-all: true
+    importas:
+      no-extra-aliases: true
+    ireturn:
+      allow:
+        - anon
+        - error
+        - empty
+        - stdlib
+        - ^([A-Z])$
+    lll:
+      line-length: 120
+      tab-width: 4
+    misspell:
+      locale: UK
+      ignore-rules:
+        - davisd
+        - color
+    mnd:
+      ignored-functions:
+        - strconv.Parse*
+        - strconv.Format*
+        - big.Parse*
+    nakedret:
+      max-func-lines: 0
+    nestif:
+      min-complexity: 4
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+    staticcheck:
+      checks:
+        - all
+    wsl_v5:
+      disable:
+        - err
+        - decl
+  exclusions:
+    generated: lax
+    rules:
+      - linters:
+          - decorder
+          - dupl
+          - err113
+          - errcheck
+          - errchkjson
+          - forcetypeassert
+          - funlen
+          - gocognit
+          - goconst
+          - godot
+          - gosec
+          - lll
+          - maintidx
+          - nilnil
+          - wsl_v5
+        path: _test\.go
+      - linters:
+          - gochecknoglobals
+          - mnd
+          - tagliatelle
+        path: config/
+      - linters:
+          - cyclop
+        path: (.+)_test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - decorder
-        - dupl
-        - errcheck
-        - funlen
-        - gochecknoglobals
-        - gosec
-        - gocognit
-        - goconst
-        - godot
-        - goerr113
-        - ireturn
-        - maintidx
-        - nilnil
-        - noctx
-        - wsl
-    - path: config/
-      linters:
-        - gochecknoglobals
-        - gomnd
-        - tagliatelle
-  exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

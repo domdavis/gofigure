@@ -17,7 +17,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: '1.20'
+        go-version: '1.25.1'
         cache: false
 
     - name: Build
@@ -27,7 +27,6 @@ jobs:
       run: go test -v ./...
 
     - name: Lint
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v8
       with:
         version: latest
-        skip-pkg-cache: true

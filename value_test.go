@@ -2,6 +2,7 @@ package gofigure_test
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"testing"
 	"time"
@@ -226,5 +227,435 @@ func TestAssign(t *testing.T) {
 		err := gofigure.Assign(&setting, "s")
 
 		assert.ErrorIs(t, err, strconv.ErrSyntax)
+	})
+}
+
+func TestIntegerOverflow(t *testing.T) {
+	t.Run("int8 overflow positive", func(t *testing.T) {
+		t.Parallel()
+
+		var i int8
+
+		err := gofigure.Assign(&i, math.MaxInt8+1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("int8 overflow negative", func(t *testing.T) {
+		t.Parallel()
+
+		var i int8
+
+		err := gofigure.Assign(&i, math.MinInt8-1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("int16 overflow positive", func(t *testing.T) {
+		t.Parallel()
+
+		var i int16
+
+		err := gofigure.Assign(&i, math.MaxInt16+1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("int16 overflow negative", func(t *testing.T) {
+		t.Parallel()
+
+		var i int16
+
+		err := gofigure.Assign(&i, math.MinInt16-1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("int32 overflow positive", func(t *testing.T) {
+		t.Parallel()
+
+		var i int32
+
+		err := gofigure.Assign(&i, math.MaxInt32+1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("int32 overflow negative", func(t *testing.T) {
+		t.Parallel()
+
+		var i int32
+
+		err := gofigure.Assign(&i, math.MinInt32-1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("uint8 overflow positive", func(t *testing.T) {
+		t.Parallel()
+
+		var i uint8
+
+		err := gofigure.Assign(&i, math.MaxUint8+1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("uint8 negative value", func(t *testing.T) {
+		t.Parallel()
+
+		var i uint8
+
+		err := gofigure.Assign(&i, -1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("uint16 overflow positive", func(t *testing.T) {
+		t.Parallel()
+
+		var i uint16
+
+		err := gofigure.Assign(&i, math.MaxUint16+1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("uint16 negative value", func(t *testing.T) {
+		t.Parallel()
+
+		var i uint16
+
+		err := gofigure.Assign(&i, -1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("uint32 overflow positive", func(t *testing.T) {
+		t.Parallel()
+
+		var i uint32
+
+		err := gofigure.Assign(&i, math.MaxUint32+1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("uint32 negative value", func(t *testing.T) {
+		t.Parallel()
+
+		var i uint32
+
+		err := gofigure.Assign(&i, -1)
+
+		assert.ErrorIs(t, err, gofigure.ErrInvalidType)
+	})
+
+	t.Run("int8 valid boundary values", func(t *testing.T) {
+		t.Parallel()
+
+		var minimum, maximum int8
+
+		errMin := gofigure.Assign(&minimum, int8(math.MinInt8))
+		errMax := gofigure.Assign(&maximum, int8(math.MaxInt8))
+
+		assert.NoError(t, errMin)
+		assert.NoError(t, errMax)
+		assert.Equal(t, int8(math.MinInt8), minimum)
+		assert.Equal(t, int8(math.MaxInt8), maximum)
+	})
+
+	t.Run("uint8 valid boundary values", func(t *testing.T) {
+		t.Parallel()
+
+		var minimum, maximum uint8
+
+		errMin := gofigure.Assign(&minimum, uint8(0))
+		errMax := gofigure.Assign(&maximum, uint8(math.MaxUint8))
+
+		assert.NoError(t, errMin)
+		assert.NoError(t, errMax)
+		assert.Equal(t, uint8(0), minimum)
+		assert.Equal(t, uint8(math.MaxUint8), maximum)
+	})
+
+	t.Run("int16 valid boundary values", func(t *testing.T) {
+		t.Parallel()
+
+		var minimum, maximum int16
+
+		errMin := gofigure.Assign(&minimum, int16(math.MinInt8))
+		errMax := gofigure.Assign(&maximum, int16(math.MaxInt8))
+
+		assert.NoError(t, errMin)
+		assert.NoError(t, errMax)
+		assert.Equal(t, int16(math.MinInt8), minimum)
+		assert.Equal(t, int16(math.MaxInt8), maximum)
+	})
+
+	t.Run("uint16 valid boundary values", func(t *testing.T) {
+		t.Parallel()
+
+		var minimum, maximum uint16
+
+		errMin := gofigure.Assign(&minimum, uint16(0))
+		errMax := gofigure.Assign(&maximum, uint16(math.MaxUint16))
+
+		assert.NoError(t, errMin)
+		assert.NoError(t, errMax)
+		assert.Equal(t, uint16(0), minimum)
+		assert.Equal(t, uint16(math.MaxUint16), maximum)
+	})
+
+	t.Run("int32 valid boundary values", func(t *testing.T) {
+		t.Parallel()
+
+		var minimum, maximum int32
+
+		errMin := gofigure.Assign(&minimum, int32(math.MinInt8))
+		errMax := gofigure.Assign(&maximum, int32(math.MaxInt8))
+
+		assert.NoError(t, errMin)
+		assert.NoError(t, errMax)
+		assert.Equal(t, int32(math.MinInt8), minimum)
+		assert.Equal(t, int32(math.MaxInt8), maximum)
+	})
+
+	t.Run("uint32 valid boundary values", func(t *testing.T) {
+		t.Parallel()
+
+		var minimum, maximum uint32
+
+		errMin := gofigure.Assign(&minimum, uint32(0))
+		errMax := gofigure.Assign(&maximum, uint32(math.MaxUint32))
+
+		assert.NoError(t, errMin)
+		assert.NoError(t, errMax)
+		assert.Equal(t, uint32(0), minimum)
+		assert.Equal(t, uint32(math.MaxUint32), maximum)
+	})
+}
+
+func TestFloatPrecision(t *testing.T) {
+	t.Run("float32 maximum value", func(t *testing.T) {
+		t.Parallel()
+
+		var f float32
+
+		err := gofigure.Assign(&f, float32(math.MaxFloat32))
+
+		assert.NoError(t, err)
+		assert.Equal(t, float32(math.MaxFloat32), f)
+	})
+
+	t.Run("float32 smallest nonzero value", func(t *testing.T) {
+		t.Parallel()
+
+		var f float32
+
+		err := gofigure.Assign(&f, float32(math.SmallestNonzeroFloat32))
+
+		assert.NoError(t, err)
+		assert.Equal(t, float32(math.SmallestNonzeroFloat32), f)
+	})
+
+	t.Run("float32 scientific notation", func(t *testing.T) {
+		t.Parallel()
+
+		var f float32
+
+		err := gofigure.Assign(&f, "1.23e-4")
+
+		assert.NoError(t, err)
+		assert.InDelta(t, 0.000123, f, 0.0000001)
+	})
+
+	t.Run("float32 large scientific notation", func(t *testing.T) {
+		t.Parallel()
+
+		var f float32
+
+		err := gofigure.Assign(&f, "1.23e10")
+
+		assert.NoError(t, err)
+		assert.InDelta(t, 12300000000.0, f, 1000.0)
+	})
+
+	t.Run("float64 maximum value", func(t *testing.T) {
+		t.Parallel()
+
+		var f float64
+
+		err := gofigure.Assign(&f, math.MaxFloat64)
+
+		assert.NoError(t, err)
+		assert.Equal(t, math.MaxFloat64, f)
+	})
+
+	t.Run("float64 smallest nonzero value", func(t *testing.T) {
+		t.Parallel()
+
+		var f float64
+
+		err := gofigure.Assign(&f, math.SmallestNonzeroFloat64)
+
+		assert.NoError(t, err)
+		assert.Equal(t, math.SmallestNonzeroFloat64, f)
+	})
+
+	t.Run("float64 scientific notation", func(t *testing.T) {
+		t.Parallel()
+
+		var f float64
+
+		err := gofigure.Assign(&f, "1.23456789e-10")
+
+		assert.NoError(t, err)
+		assert.InDelta(t, 0.000000000123456789, f, 1e-18)
+	})
+
+	t.Run("float64 large scientific notation", func(t *testing.T) {
+		t.Parallel()
+
+		var f float64
+
+		err := gofigure.Assign(&f, "9.87654321e15")
+
+		assert.NoError(t, err)
+		assert.InDelta(t, 9876543210000000.0, f, 1.0)
+	})
+
+	t.Run("float32 negative scientific notation", func(t *testing.T) {
+		t.Parallel()
+
+		var f float32
+
+		err := gofigure.Assign(&f, "-5.67e-3")
+
+		assert.NoError(t, err)
+		assert.InDelta(t, -0.00567, f, 0.0000001)
+	})
+
+	t.Run("float64 negative scientific notation", func(t *testing.T) {
+		t.Parallel()
+
+		var f float64
+
+		err := gofigure.Assign(&f, "-3.14159e20")
+
+		assert.NoError(t, err)
+		assert.InDelta(t, -3.14159e20, f, 1e10)
+	})
+}
+
+func FuzzCoerceInt(f *testing.F) {
+	f.Add("0")
+	f.Add("123")
+	f.Add("-456")
+	f.Add("127")
+	f.Add("-128")
+	f.Add("32767")
+	f.Add("-32768")
+	f.Add("2147483647")
+	f.Add("-2147483648")
+	f.Add("9223372036854775807")
+	f.Add("-9223372036854775808")
+
+	f.Fuzz(func(t *testing.T, input string) {
+		var i int
+		_ = gofigure.Assign(&i, input)
+
+		var i8 int8
+		_ = gofigure.Assign(&i8, input)
+
+		var i16 int16
+		_ = gofigure.Assign(&i16, input)
+
+		var i32 int32
+		_ = gofigure.Assign(&i32, input)
+
+		var i64 int64
+		_ = gofigure.Assign(&i64, input)
+	})
+}
+
+func FuzzCoerceUint(f *testing.F) {
+	f.Add("0")
+	f.Add("123")
+	f.Add("255")
+	f.Add("65535")
+	f.Add("4294967295")
+	f.Add("18446744073709551615")
+
+	f.Fuzz(func(t *testing.T, input string) {
+		var u uint
+		_ = gofigure.Assign(&u, input)
+
+		var u8 uint8
+		_ = gofigure.Assign(&u8, input)
+
+		var u16 uint16
+		_ = gofigure.Assign(&u16, input)
+
+		var u32 uint32
+		_ = gofigure.Assign(&u32, input)
+
+		var u64 uint64
+		_ = gofigure.Assign(&u64, input)
+	})
+}
+
+func FuzzCoerceFloat(f *testing.F) {
+	f.Add("0.0")
+	f.Add("3.14")
+	f.Add("-2.71828")
+	f.Add("1.23e-4")
+	f.Add("9.87e15")
+	f.Add("-5.67e-3")
+	f.Add("inf")
+	f.Add("-inf")
+	f.Add("nan")
+
+	f.Fuzz(func(t *testing.T, input string) {
+		var f32 float32
+		_ = gofigure.Assign(&f32, input)
+
+		var f64 float64
+		_ = gofigure.Assign(&f64, input)
+	})
+}
+
+func FuzzCoerceBool(f *testing.F) {
+	f.Add("true")
+	f.Add("false")
+	f.Add("1")
+	f.Add("0")
+	f.Add("t")
+	f.Add("f")
+	f.Add("T")
+	f.Add("F")
+	f.Add("TRUE")
+	f.Add("FALSE")
+
+	f.Fuzz(func(t *testing.T, input string) {
+		var b bool
+		_ = gofigure.Assign(&b, input)
+	})
+}
+
+func FuzzCoerceDuration(f *testing.F) {
+	f.Add("1ns")
+	f.Add("1us")
+	f.Add("1ms")
+	f.Add("1s")
+	f.Add("1m")
+	f.Add("1h")
+	f.Add("1h30m")
+	f.Add("300ms")
+	f.Add("-1s")
+
+	f.Fuzz(func(t *testing.T, input string) {
+		var d time.Duration
+		_ = gofigure.Assign(&d, input)
 	})
 }

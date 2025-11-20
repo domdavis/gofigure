@@ -21,6 +21,9 @@ type Parameters []Parameter
 // for each source with Flag and Key using the name as is, EnvSuffix set to the
 // uppercase version of the name, and ShortFlag set to the first character of
 // name.
+//
+// NewParameters panics if name is empty. This is considered a programming error
+// and should be caught during development.
 func NewParameters(name string, sources Source) Parameters {
 	var p []Parameter
 

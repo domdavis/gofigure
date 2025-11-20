@@ -2,6 +2,6 @@
   "name": "overridden",
   "address": "localhost:8000",
   "duration": "1h",
-  "int": 0,
-  "float": 0
+  "int": 12,
+  "float": 12.3
 }

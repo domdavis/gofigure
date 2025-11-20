@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 // ErrLoadingJSON is returned if an external file cannot be read from the path
@@ -21,12 +23,35 @@ var ErrParsingJSON = errors.New("error parsing JSON")
 // ErrLoadingConfig is given to a ConfigError if Load fails.
 var ErrLoadingConfig = errors.New("error loading config")
 
+const (
+	// Maximum size for remote configuration files (10MB).
+	maxConfigSize = 10 * 1024 * 1024
+
+	// HTTP client timeout for the entire request (30 seconds).
+	httpTimeout = 30 * time.Second
+
+	// Connection timeout (10 seconds).
+	dialTimeout = 10 * time.Second
+
+	// TLS handshake timeout (10 seconds).
+	tlsTimeout = 10 * time.Second
+
+	// Timeout for reading response headers (10 seconds).
+	responseHeaderTimeout = 10 * time.Second
+)
+
 // Load external Options from a URI. The external file can be any JSON
 // object.
 func Load(uri string) (Options, error) {
+	return LoadWithContext(context.Background(), uri)
+}
+
+// LoadWithContext loads external Options from a URI with context support for
+// cancellation and timeout control. The external file can be any JSON object.
+func LoadWithContext(ctx context.Context, uri string) (Options, error) {
 	options := Options{}
 
-	data, err := Get(uri)
+	data, err := GetWithContext(ctx, uri)
 
 	if err != nil {
 		return options, NewConfigError(ErrLoadingConfig,
@@ -43,25 +68,49 @@ func Load(uri string) (Options, error) {
 
 // Get a JSON object from an external source.
 func Get(uri string) (map[string]any, error) {
+	return GetWithContext(context.Background(), uri)
+}
+
+// GetWithContext retrieves a JSON object from an external source with context
+// support for cancellation and timeout control.
+func GetWithContext(ctx context.Context, uri string) (map[string]any, error) {
 	var data map[string]any
 
-	f := os.ReadFile
+	var b []byte
+	var err error
 
 	if strings.HasPrefix(uri, "http://") || strings.HasPrefix(uri, "https://") {
-		f = get
+		b, err = get(ctx, uri)
+	} else {
+		//nolint:gosec // We want to include a file from a variable.
+		b, err = os.ReadFile(uri)
 	}
 
-	if b, err := f(uri); err != nil {
-		return data, fmt.Errorf("%w from %q: %s", ErrLoadingJSON, uri, err.Error())
-	} else if err = json.Unmarshal(b, &data); err != nil {
-		return data, fmt.Errorf("%w %q: %s", ErrParsingJSON, uri, err.Error())
+	if err != nil {
+		return data, fmt.Errorf("%w from %q: %w", ErrLoadingJSON, uri, err)
+	}
+
+	if err = json.Unmarshal(b, &data); err != nil {
+		return data, fmt.Errorf("%w %q: %w", ErrParsingJSON, uri, err)
 	}
 
 	return data, nil
 }
 
-func get(uri string) ([]byte, error) {
-	ctx := context.Background()
+func get(ctx context.Context, uri string) ([]byte, error) {
+	client := &http.Client{
+		Timeout: httpTimeout,
+		Transport: &http.Transport{
+			DialContext: (&net.Dialer{
+				Timeout:   dialTimeout,
+				KeepAlive: dialTimeout,
+			}).DialContext,
+			TLSHandshakeTimeout:   tlsTimeout,
+			ResponseHeaderTimeout: responseHeaderTimeout,
+			ExpectContinueTimeout: 1 * time.Second,
+		},
+	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 
 	if err != nil {
@@ -69,21 +118,32 @@ func get(uri string) ([]byte, error) {
 			"failed to request external config from %s: %w", uri, err)
 	}
 
-	r, err := http.DefaultClient.Do(req)
+	r, err := client.Do(req)
 
 	if err != nil {
 		return []byte{}, fmt.Errorf(
 			"failed to get external config from %s: %w", uri, err)
 	}
 
-	//nolint:errcheck // Not a huge amount we can do here.
 	defer func() { _ = r.Body.Close() }()
 
-	b, err := io.ReadAll(r.Body)
+	if r.StatusCode != http.StatusOK {
+		return []byte{}, fmt.Errorf(
+			"%w: config fetch from %s failed with status %d: %s",
+			ErrLoadingConfig, uri, r.StatusCode, r.Status)
+	}
+
+	b, err := io.ReadAll(io.LimitReader(r.Body, maxConfigSize))
 
 	if err != nil {
 		return []byte{}, fmt.Errorf(
 			"failed to read external config from %s: %w", uri, err)
+	}
+
+	if len(b) >= maxConfigSize {
+		return []byte{}, fmt.Errorf(
+			"%w: config file from %s exceeds maximum size of %d bytes",
+			ErrLoadingConfig, uri, maxConfigSize)
 	}
 
 	return b, nil

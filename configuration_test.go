@@ -28,7 +28,6 @@ func TestConfiguration_Format(t *testing.T) {
 		assert.Equal(t, "unexpected argument: [--extra]", msg)
 	})
 
-	//nolint:paralleltest // Testing environment variables.
 	t.Run("Invalid environment variables are reported", func(t *testing.T) {
 		var value int
 

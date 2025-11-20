@@ -102,3 +102,38 @@ func flag(name string, source gofigure.Source) gofigure.Parameter {
 
 	return a
 }
+
+func FuzzParseFlags(f *testing.F) {
+	f.Add([]byte("-v"))
+	f.Add([]byte("--name value"))
+	f.Add([]byte("-a A -b B"))
+	f.Add([]byte("--flag=value"))
+	f.Add([]byte("-x"))
+	f.Add([]byte("--long-flag"))
+	f.Add([]byte("-abc"))
+	f.Add([]byte("--key value --other"))
+	f.Add([]byte("-"))
+	f.Add([]byte("--"))
+
+	f.Fuzz(func(t *testing.T, input []byte) {
+		args := []string{string(input)}
+
+		_, _ = gofigure.Flags(args)
+	})
+}
+
+func FuzzParseFlagsMultiple(f *testing.F) {
+	f.Add("-v", "true")
+	f.Add("--name", "value")
+	f.Add("-a", "A")
+	f.Add("--key", "")
+	f.Add("-x", "--y")
+	f.Add("--flag", "123")
+	f.Add("-a-b", "test")
+
+	f.Fuzz(func(t *testing.T, flag1, flag2 string) {
+		args := []string{flag1, flag2}
+
+		_, _ = gofigure.Flags(args)
+	})
+}
