@@ -319,3 +319,47 @@ func TestGet(t *testing.T) {
 		assert.Equal(t, float64(2), data["hops"])
 	})
 }
+
+func FuzzGetJSON(f *testing.F) {
+	f.Add(`{"key": "value"}`)
+	f.Add(`{"int": 42}`)
+	f.Add(`{"float": 3.14}`)
+	f.Add(`{"bool": true}`)
+	f.Add(`{"null": null}`)
+	f.Add(`{"array": [1, 2, 3]}`)
+	f.Add(`{"nested": {"deep": "value"}}`)
+	f.Add(`{}`)
+	f.Add(`{"key": ""}`)
+	f.Add(`{"unicode": "世界🌍"}`)
+
+	f.Fuzz(func(t *testing.T, jsonInput string) {
+		server := httptest.NewServer(http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(jsonInput))
+			}))
+		defer server.Close()
+
+		_, _ = gofigure.Get(server.URL)
+	})
+}
+
+func FuzzLoadJSON(f *testing.F) {
+	f.Add(`{"name": "test"}`)
+	f.Add(`{"value": 123}`)
+	f.Add(`{"enabled": true}`)
+	f.Add(`{"config": {"nested": true}}`)
+	f.Add(`{"items": ["a", "b", "c"]}`)
+	f.Add(`{"mixed": [1, "two", 3.0, true, null]}`)
+
+	f.Fuzz(func(t *testing.T, jsonInput string) {
+		server := httptest.NewServer(http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(jsonInput))
+			}))
+		defer server.Close()
+
+		_, _ = gofigure.Load(server.URL)
+	})
+}

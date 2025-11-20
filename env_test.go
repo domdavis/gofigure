@@ -123,3 +123,36 @@ func TestEnvironmentEdgeCases(t *testing.T) {
 		assert.NotEmpty(t, m)
 	})
 }
+
+func FuzzEnvironmentValues(f *testing.F) {
+	f.Add("test")
+	f.Add("123")
+	f.Add("true")
+	f.Add("1h30m")
+	f.Add("")
+	f.Add("  spaces  ")
+	f.Add("unicode-世界")
+	f.Add("path/to/file")
+	f.Add("key value")
+	f.Add("!@#$%^&*()")
+
+	f.Fuzz(func(t *testing.T, value string) {
+		// Skip values that contain null bytes or other characters
+		// that can't be set as environment variable values
+		for i := 0; i < len(value); i++ {
+			if value[i] == 0 || value[i] == '=' {
+				t.Skip("skipping value with null byte or equals sign")
+			}
+		}
+
+		var strValue string
+
+		t.Setenv("FUZZ_VAR", value)
+
+		settings := gofigure.Settings{
+			gofigure.Optional("fuzz", "fuzz-var", &strValue, "", gofigure.EnvVar, gofigure.ReportValue, "fuzz test"),
+		}
+
+		_ = gofigure.Environment("", settings)
+	})
+}

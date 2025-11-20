@@ -547,3 +547,115 @@ func TestFloatPrecision(t *testing.T) {
 		assert.InDelta(t, -3.14159e20, f, 1e10)
 	})
 }
+
+func FuzzCoerceInt(f *testing.F) {
+	f.Add("0")
+	f.Add("123")
+	f.Add("-456")
+	f.Add("127")
+	f.Add("-128")
+	f.Add("32767")
+	f.Add("-32768")
+	f.Add("2147483647")
+	f.Add("-2147483648")
+	f.Add("9223372036854775807")
+	f.Add("-9223372036854775808")
+
+	f.Fuzz(func(t *testing.T, input string) {
+		var i int
+		_ = gofigure.Assign(&i, input)
+
+		var i8 int8
+		_ = gofigure.Assign(&i8, input)
+
+		var i16 int16
+		_ = gofigure.Assign(&i16, input)
+
+		var i32 int32
+		_ = gofigure.Assign(&i32, input)
+
+		var i64 int64
+		_ = gofigure.Assign(&i64, input)
+	})
+}
+
+func FuzzCoerceUint(f *testing.F) {
+	f.Add("0")
+	f.Add("123")
+	f.Add("255")
+	f.Add("65535")
+	f.Add("4294967295")
+	f.Add("18446744073709551615")
+
+	f.Fuzz(func(t *testing.T, input string) {
+		var u uint
+		_ = gofigure.Assign(&u, input)
+
+		var u8 uint8
+		_ = gofigure.Assign(&u8, input)
+
+		var u16 uint16
+		_ = gofigure.Assign(&u16, input)
+
+		var u32 uint32
+		_ = gofigure.Assign(&u32, input)
+
+		var u64 uint64
+		_ = gofigure.Assign(&u64, input)
+	})
+}
+
+func FuzzCoerceFloat(f *testing.F) {
+	f.Add("0.0")
+	f.Add("3.14")
+	f.Add("-2.71828")
+	f.Add("1.23e-4")
+	f.Add("9.87e15")
+	f.Add("-5.67e-3")
+	f.Add("inf")
+	f.Add("-inf")
+	f.Add("nan")
+
+	f.Fuzz(func(t *testing.T, input string) {
+		var f32 float32
+		_ = gofigure.Assign(&f32, input)
+
+		var f64 float64
+		_ = gofigure.Assign(&f64, input)
+	})
+}
+
+func FuzzCoerceBool(f *testing.F) {
+	f.Add("true")
+	f.Add("false")
+	f.Add("1")
+	f.Add("0")
+	f.Add("t")
+	f.Add("f")
+	f.Add("T")
+	f.Add("F")
+	f.Add("TRUE")
+	f.Add("FALSE")
+
+	f.Fuzz(func(t *testing.T, input string) {
+		var b bool
+		_ = gofigure.Assign(&b, input)
+	})
+}
+
+func FuzzCoerceDuration(f *testing.F) {
+	f.Add("1ns")
+	f.Add("1us")
+	f.Add("1ms")
+	f.Add("1s")
+	f.Add("1m")
+	f.Add("1h")
+	f.Add("1h30m")
+	f.Add("300ms")
+	f.Add("-1s")
+
+	f.Fuzz(func(t *testing.T, input string) {
+		var d time.Duration
+		_ = gofigure.Assign(&d, input)
+	})
+}
